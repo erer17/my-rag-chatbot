@@ -23,7 +23,7 @@ HF_API_URL = "https://router.huggingface.co/v1/chat/completions"
 hf_client = InferenceClient(token=HF_TOKEN)
 
 def get_embedding(text):
-    result = hf_client.feature_extraction(text, model="sentence-transformers/all-MiniLM-L6-v2")
+    result = hf_client.feature_extraction(text, model="sBAAI/bge-small-zh-v1.5")
     if hasattr(result, 'ndim') and result.ndim == 2:
         result = result.mean(axis=0)
     return result.tolist()

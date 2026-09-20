@@ -8,14 +8,14 @@ HF_TOKEN = os.environ.get("HF_TOKEN")
 hf_client = InferenceClient(token=HF_TOKEN)
 
 def get_embedding(text):
-    result = hf_client.feature_extraction(text, model="sentence-transformers/all-MiniLM-L6-v2")
+    result = hf_client.feature_extraction(text, model="BAAI/bge-small-zh-v1.5")
     if hasattr(result, 'ndim') and result.ndim == 2:
         result = result.mean(axis=0)
     return result.tolist()
 
 pdf_folder = "."
 all_documents = []
-splitter = RecursiveCharacterTextSplitter(chunk_size=600, chunk_overlap=80)
+splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=50)
 
 for filename in os.listdir(pdf_folder):
     if filename.endswith(".pdf"):
