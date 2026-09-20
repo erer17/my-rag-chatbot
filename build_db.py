@@ -13,21 +13,25 @@ def get_embedding(text):
         result = result.mean(axis=0)
     return result.tolist()
 
-reader = PdfReader("紫微斗数 令东来.pdf")
-full_text = ""
-for page in reader.pages:
-    full_text += page.extract_text() + "\n"
-
+pdf_folder = "."
+all_documents = []
 splitter = RecursiveCharacterTextSplitter(chunk_size=600, chunk_overlap=80)
-documents = splitter.split_text(full_text)
 
-print(f"共切成 {len(documents)} 段，开始算向量...")
+for filename in os.listdir(pdf_folder):
+    if filename.endswith(".pdf"):
+        reader = PdfReader(os.path.join(pdf_folder, filename))
+        full_text = ""
+        for page in reader.pages:
+            full_text += page.extract_text() + "\n"
+        chunks = splitter.split_text(full_text)
+        all_documents.extend(chunks)
+
+documents = all_documents
+print(f"切成了 {len(documents)} 个段落，开始用API算向量...")
 
 client = chromadb.PersistentClient(path="./chroma_db")
-
-# 先删掉旧的collection，避免新旧向量混在一起
 try:
-    client.delete_collection("company_docs")
+    client.delete_collection("company_docs")  # 清掉旧的，避免混杂
 except:
     pass
 collection = client.get_or_create_collection("company_docs")
@@ -44,7 +48,7 @@ collection.add(
     ids=[f"doc{i}" for i in range(len(documents))]
 )
 
-print("向量数据库重建完成！")
+print("向量数据库建立完成！")
 
 # from sentence_transformers import SentenceTransformer
 # import chromadb
